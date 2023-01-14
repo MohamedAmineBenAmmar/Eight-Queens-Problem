@@ -65,11 +65,6 @@ bool is_not_valid(int **matrix, int size, int row, int col, map<int, struct Posi
     // Verify the diagonals
     while (prev_row > -1 || prev_col > -1 || next_row < size || next_col < size)
     {
-        // cout << prev_row << " " << prev_col << " " << next_row << " " << next_col <<  endl;
-        // int x;
-        // cin >> x;
-        // cout << '\n';
-
         if ((prev_row > -1) && (prev_col > -1) && (matrix[prev_row][prev_col] == 1))
         {
             left_upper_diag = true;
@@ -124,101 +119,50 @@ void set_queens(int **matrix, int size, int row, map<int, struct Position> &quee
     // r: for remove queen
     bool placed;
     bool is_not_valid_position;
+    int loop_start_index, queen_old_col;
 
     if (row < size)
     {
         if (operation == 's')
         {
-            // Going to set a queen in the row of index equal to row
-            placed = false;
-            for (int j = 0; j < size; j++)
-            {
-                bool is_not_valid_position = is_not_valid(matrix, size, row, j, queens_positions_by_row, queens_positions_by_col);
-
-                if (!is_not_valid_position)
-                {
-
-                    Position pos;
-                    pos.row = row;
-                    pos.col = j;
-
-                    matrix[row][j] = 1;
-
-                    // cout << "matrix state change" << endl;
-                    // display(matrix, size);
-                    // cout << "\n";
-
-                    placed = true;
-
-                    queens_positions_by_row.insert(pair<int, Position>(row, pos));
-                    queens_positions_by_col.insert(pair<int, Position>(j, pos));
-                    break;
-                }
-            }
-
-            // If the this loop finished and the palced flag is still false means that there is no place on the current row
-            if (!placed)
-            {
-                set_queens(matrix, size, row - 1, queens_positions_by_row, queens_positions_by_col, 'r');
-            }
-            else
-            {
-                set_queens(matrix, size, row + 1, queens_positions_by_row, queens_positions_by_col, 's');
-            }
+            loop_start_index = 0;
         }
         else
         {
-            // Going to remove the queen from the row equal to row
-            if (queens_positions_by_row.count(row) > 0)
+            queen_old_col = queens_positions_by_row[row].col;
+            matrix[row][queens_positions_by_row[row].col] = 0;
+            queens_positions_by_col.erase(queens_positions_by_row[row].col);
+            queens_positions_by_row.erase(row);
+            loop_start_index = queen_old_col + 1;
+        }
+
+        placed = false;
+        for (int j = loop_start_index; j < size; j++)
+        {
+            bool is_not_valid_position = is_not_valid(matrix, size, row, j, queens_positions_by_row, queens_positions_by_col);
+
+            if (!is_not_valid_position)
             {
-                // Updated portion
-                int queen_old_col = queens_positions_by_row[row].col;
-                matrix[row][queens_positions_by_row[row].col] = 0;
 
-                // cout << "matrix state change" << endl;
-                // display(matrix, size);
-                // cout << "\n";
-
-                queens_positions_by_col.erase(queens_positions_by_row[row].col);
-                queens_positions_by_row.erase(row);
-
-                placed = false;
-                for (int j = queen_old_col + 1; j < size; j++)
-                {
-                    is_not_valid_position = is_not_valid(matrix, size, row, j, queens_positions_by_row, queens_positions_by_col);
-
-                    if (!is_not_valid_position)
-                    {
-
-                        Position pos;
-                        pos.row = row;
-                        pos.col = j;
-
-                        matrix[row][j] = 1;
-
-                        // cout << "matrix state change" << endl;
-                        // display(matrix, size);
-                        // cout << "\n";
-
-                        placed = true;
-
-                        queens_positions_by_row.insert(pair<int, Position>(row, pos));
-                        queens_positions_by_col.insert(pair<int, Position>(j, pos));
-                        break;
-                    }
-                }
-
-                // If the this loop finished and the palced flag is still false means that there is no place on the current row
-                if (!placed)
-                {
-                    set_queens(matrix, size, row - 1, queens_positions_by_row, queens_positions_by_col, 'r');
-                }
-                else
-                {
-                    set_queens(matrix, size, row + 1, queens_positions_by_row, queens_positions_by_col, 's');
-                }
-                // end updated portion
+                Position pos;
+                pos.row = row;
+                pos.col = j;
+                matrix[row][j] = 1;
+                placed = true;
+                queens_positions_by_row.insert(pair<int, Position>(row, pos));
+                queens_positions_by_col.insert(pair<int, Position>(j, pos));
+                break;
             }
+        }
+
+        // If the this loop finished and the palced flag is still false means that there is no place on the current row
+        if (!placed)
+        {
+            set_queens(matrix, size, row - 1, queens_positions_by_row, queens_positions_by_col, 'r');
+        }
+        else
+        {
+            set_queens(matrix, size, row + 1, queens_positions_by_row, queens_positions_by_col, 's');
         }
     }
 }
